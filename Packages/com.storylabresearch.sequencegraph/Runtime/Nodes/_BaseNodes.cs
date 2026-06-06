@@ -21,25 +21,38 @@ namespace StoryLabResearch.SequenceGraph
 
         public BaseControlNode GetNextControlNode()
         {
-            BaseControlNode result = null;
-            try
-            {
-                result = GetOutputPort(nameof(Output)).GetConnections()[0].node as BaseControlNode;
-            }
-            catch
-            {
-                Debug.Log("No output node for " + name);
-            }
-            return result;
+            // The Output port carries at most one connection (ConnectionType.Override).
+            NodePort port = GetOutputPort(nameof(Output));
+            if (port == null || port.ConnectionCount == 0) return null;
+            return port.GetConnection(0).node as BaseControlNode;
         }
+
+        // The Trigger -> ActionNode list is fixed by the graph topology, which only
+        // changes in the editor. GetActionNodes is called every frame a node is
+        // evaluated (e.g. while a Wait node blocks), so we build the list once and
+        // cache it rather than re-allocating a List + LINQ chain per frame.
+        private List<ActionNode> _cachedActionNodes;
 
         public List<ActionNode> GetActionNodes()
         {
-            var port = GetOutputPort(nameof(Trigger));
-            var connections = port.GetConnections();
-            var nodes = connections.Select(x => x.node as ActionNode).ToList();
-            return nodes;
+            if (_cachedActionNodes != null) return _cachedActionNodes;
+
+            _cachedActionNodes = new List<ActionNode>();
+            NodePort port = GetOutputPort(nameof(Trigger));
+            if (port != null)
+            {
+                int count = port.ConnectionCount;
+                for (int i = 0; i < count; i++)
+                {
+                    if (port.GetConnection(i).node is ActionNode actionNode) _cachedActionNodes.Add(actionNode);
+                }
+            }
+            return _cachedActionNodes;
         }
+
+        // Call if the graph topology changes at runtime (rare). The editor rebuilds
+        // on domain reload anyway, so this is only needed for runtime graph edits.
+        public void InvalidateActionNodeCache() => _cachedActionNodes = null;
 
         public virtual void EnterNode() { }
     }
@@ -76,9 +89,14 @@ namespace StoryLabResearch.SequenceGraph
 
         public static bool CombinePortConditions(NodePort port, ConditionCombinationMode mode)
         {
-            var conditions = port.GetConnections().Select(x => (x.node as ConditionNode).TestCondition()).ToList();
+            // Called every frame while a Wait node blocks. Iterate the connections
+            // directly and short-circuit where possible, rather than materialising a
+            // List<bool> via LINQ each frame. Each connected condition is evaluated at
+            // most once; the conditions themselves change frame-to-frame so they can't
+            // be cached, but the surrounding machinery need not allocate.
+            int count = port.ConnectionCount;
 
-            if (conditions == null || conditions.Count < 1)
+            if (count < 1)
             {
                 Debug.LogWarning("No conditions connected to port " + port.fieldName + " on node " + port.node);
                 return false;
@@ -87,18 +105,21 @@ namespace StoryLabResearch.SequenceGraph
             switch (mode)
             {
                 case ConditionCombinationMode.All:
-                    bool acc = true;
-                    foreach (bool condition in conditions) acc &= condition;
-                    return acc;
+                    for (int i = 0; i < count; i++)
+                        if (!(port.GetConnection(i).node as ConditionNode).TestCondition()) return false;
+                    return true;
                 case ConditionCombinationMode.Any:
-                    foreach (bool condition in conditions) if (condition) return true;
+                    for (int i = 0; i < count; i++)
+                        if ((port.GetConnection(i).node as ConditionNode).TestCondition()) return true;
                     return false;
                 case ConditionCombinationMode.NotAll:
                     int trueCount = 0;
-                    foreach (bool condition in conditions) if (condition) trueCount++;
-                    return trueCount < conditions.Count - 1;
+                    for (int i = 0; i < count; i++)
+                        if ((port.GetConnection(i).node as ConditionNode).TestCondition()) trueCount++;
+                    return trueCount < count - 1;
                 case ConditionCombinationMode.None:
-                    foreach (bool condition in conditions) if (condition) return false;
+                    for (int i = 0; i < count; i++)
+                        if ((port.GetConnection(i).node as ConditionNode).TestCondition()) return false;
                     return true;
                 default:
                     throw new NotImplementedException();
