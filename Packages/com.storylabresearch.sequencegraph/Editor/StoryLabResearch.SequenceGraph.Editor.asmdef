@@ -1,0 +1,21 @@
+{
+    "name": "StoryLabResearch.SequenceGraph.Editor",
+    "rootNamespace": "StoryLabResearch.SequenceGraph",
+    "references": [
+        "StoryLabResearch.SequenceGraph",
+        "XNode",
+        "XNodeEditor",
+        "XNode.Groups"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
