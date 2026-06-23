@@ -14,8 +14,6 @@ Development monorepo for the **StoryLab Sequence Graph** Unity packages. This re
 Packages are distributed by git URL using UPM's `?path=` subfolder syntax. Add the
 relevant entries to the consumer project's `Packages/manifest.json`.
 
-> ⚠️ Replace `OWNER` below with the GitHub account/org this repo lives under.
-
 **Core only:**
 
 ```jsonc
@@ -23,7 +21,7 @@ relevant entries to the consumer project's `Packages/manifest.json`.
   "dependencies": {
     "com.github.siccity.xnode": "https://github.com/Siccity/xNode.git",
     "com.github.siccity.xnodegroups": "https://github.com/StoryLab-Research-Institute/RenamablexNodeGroups.git",
-    "com.storylabresearch.sequencegraph": "https://github.com/OWNER/sequence-graph.git?path=/Packages/com.storylabresearch.sequencegraph"
+    "com.storylabresearch.sequencegraph": "https://github.com/StoryLab-Research-Institute/sequence-graph.git?path=/Packages/com.storylabresearch.sequencegraph"
   }
 }
 ```
@@ -40,9 +38,9 @@ relevant entries to the consumer project's `Packages/manifest.json`.
   "dependencies": {
     "com.github.siccity.xnode": "https://github.com/Siccity/xNode.git",
     "com.github.siccity.xnodegroups": "https://github.com/StoryLab-Research-Institute/RenamablexNodeGroups.git",
-    "com.unity.xr.interaction.toolkit": "3.0.8",
-    "com.storylabresearch.sequencegraph": "https://github.com/OWNER/sequence-graph.git?path=/Packages/com.storylabresearch.sequencegraph",
-    "com.storylabresearch.sequencegraph.xri": "https://github.com/OWNER/sequence-graph.git?path=/Packages/com.storylabresearch.sequencegraph.xri"
+    "com.storylabresearch.sequencegraph": "https://github.com/StoryLab-Research-Institute/sequence-graph.git?path=/Packages/com.storylabresearch.sequencegraph",
+    "com.storylabresearch.sequencegraph.xri": "https://github.com/StoryLab-Research-Institute/sequence-graph.git?path=/Packages/com.storylabresearch.sequencegraph.xri",
+    "com.unity.xr.interaction.toolkit": "3.0.8"
   }
 }
 ```
@@ -52,7 +50,7 @@ relevant entries to the consumer project's `Packages/manifest.json`.
 Append a git tag (or branch/commit) with `#`:
 
 ```
-https://github.com/OWNER/sequence-graph.git?path=/Packages/com.storylabresearch.sequencegraph#v0.1.0
+https://github.com/StoryLab-Research-Institute/sequence-graph.git?path=/Packages/com.storylabresearch.sequencegraph#v0.1.0
 ```
 
 Because both packages share this repo, a tag versions **both** at once — fine while
