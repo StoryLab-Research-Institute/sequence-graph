@@ -2,7 +2,7 @@
 
 XR Interaction Toolkit (XRI) nodes for [com.storylabresearch.sequencegraph](../com.storylabresearch.sequencegraph). This package depends on the XR-agnostic core and adds action/condition nodes that drive an XRI rig.
 
-> **Status: stub.** The asmdef, package.json, and dependency wiring are in place, but the nodes themselves have not yet been written. They are being ported from an UltimateXR original; the table below tracks the work.
+> **Status: stub.** The asmdef, package.json, and dependency wiring are in place, but the nodes themselves have not yet been written. They are being ported from an UltimateXR original; the table below tracks the work. `Runtime/AssemblyInfo.cs` is an empty placeholder that only exists so the assembly compiles — delete it once real nodes land.
 
 ## Nodes to implement
 
