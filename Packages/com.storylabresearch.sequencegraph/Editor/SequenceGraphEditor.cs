@@ -28,5 +28,12 @@ namespace StoryLabResearch.SequenceGraph
         {
             // do nothing
         }
+
+        public override XNode.Node CopyNode(XNode.Node original)
+        {
+            XNode.Node node = base.CopyNode(original);
+            if (node is WaitForConditionNode waitForConditionNode) waitForConditionNode.CloneInternalConditionNode();
+            return node;
+        }
     }
 }

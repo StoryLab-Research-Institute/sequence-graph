@@ -73,6 +73,17 @@ namespace StoryLabResearch.SequenceGraph
             }
             _conditionIndex = index;
         }
+
+        // Fixes bug caused through xNode duplication where duplicated node shares condition with original one
+        // Editing one causes both to change otherwise
+        public void CloneInternalConditionNode()
+        {
+            if (_internalConditionNode == null) return;
+
+            string conditionName = _internalConditionNode.name;
+            _internalConditionNode = Instantiate(_internalConditionNode);
+            _internalConditionNode.name = conditionName;
+        }
         #endif
     }
 }
