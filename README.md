@@ -50,7 +50,7 @@ relevant entries to the consumer project's `Packages/manifest.json`.
 Append a git tag (or branch/commit) with `#`:
 
 ```
-https://github.com/StoryLab-Research-Institute/sequence-graph.git?path=/Packages/com.storylabresearch.sequencegraph#v0.1.0
+https://github.com/StoryLab-Research-Institute/sequence-graph.git?path=/Packages/com.storylabresearch.sequencegraph#v0.2.0
 ```
 
 Because both packages share this repo, a tag versions **both** at once — fine while
@@ -62,6 +62,15 @@ Open this repository's root folder in Unity 6 (via Unity Hub). The two packages 
 discovered automatically as embedded packages under `Packages/`. Edit a sequence via a
 `SequenceGraphParser` component (**StoryLabResearch ▸ Sequence Graph** menu). Test
 scenes live under [`Assets/`](Assets/).
+
+> **A Sequence Graph must live in a scene, not in a prefab.** The graph is a
+> `ScriptableObject` serialised inline into the scene file; prefab assets cannot hold
+> one, so a graph authored in Prefab Mode is discarded when the prefab closes. Since
+> 0.2.0 the parser inspector blocks this with a red error and the parser logs an error
+> on play rather than failing silently. Use **Unity Timeline** for sequencing that has
+> to ship inside a prefab, and see the [core package
+> README](Packages/com.storylabresearch.sequencegraph) for why saving the graph to disk
+> is not a workaround.
 
 ## Provenance
 

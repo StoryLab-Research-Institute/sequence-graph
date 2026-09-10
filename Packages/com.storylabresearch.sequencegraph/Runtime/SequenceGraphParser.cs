@@ -34,6 +34,21 @@ namespace StoryLabResearch.SequenceGraph
 
         private void Awake()
         {
+            if (Sequence == null)
+            {
+                // The graph is a ScriptableObject serialised into the scene. A prefab
+                // asset cannot hold one, so a parser authored in Prefab Mode reaches
+                // play mode with a null Sequence. Say why, rather than throwing a bare
+                // NullReferenceException out of Stop().
+                Debug.LogError(
+                    "SequenceGraphParser on \"" + name + "\" has no Sequence Graph and will not run. " +
+                    "A Sequence Graph is a ScriptableObject held in the scene, and Unity cannot store " +
+                    "one inside a prefab - if this parser was authored in Prefab Mode, the graph was " +
+                    "discarded when the prefab closed. Sequence Graph parsers must live directly in a " +
+                    "scene; use Unity Timeline for sequencing that has to ship inside a prefab.", this);
+                return;
+            }
+
             Stop();
         }
 
@@ -88,13 +103,20 @@ namespace StoryLabResearch.SequenceGraph
 
         public void Play()
         {
+            // Awake has already reported the missing graph; stay quiet and inert here.
+            if (Sequence == null) return;
+
+            // Covers a Sequence assigned after Awake, which would otherwise leave
+            // _activeNode null and fault on the first Update.
+            if (_activeNode == null) Stop();
+
             _parsing = true;
         }
 
         public void Stop()
         {
             _parsing = false;
-            _activeNode = Sequence.GetEntryNode();
+            if (Sequence != null) _activeNode = Sequence.GetEntryNode();
         }
 
         public void Pause()

@@ -1,11 +1,11 @@
 {
   "name": "com.storylabresearch.sequencegraph.xri",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "StoryLab Sequence Graph - XRI Nodes",
   "description": "XR Interaction Toolkit action/condition nodes for StoryLab Sequence Graph (fade, teleport, scene load, etc.). Depends on the XR-agnostic core package.",
   "unity": "6000.0",
   "dependencies": {
-    "com.storylabresearch.sequencegraph": "0.1.0",
+    "com.storylabresearch.sequencegraph": "0.2.0",
     "com.unity.xr.interaction.toolkit": "3.0.8"
   },
   "keywords": [
