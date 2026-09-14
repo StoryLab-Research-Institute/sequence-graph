@@ -57,11 +57,24 @@ namespace StoryLabResearch.SequenceGraph
         }
 
         #if UNITY_EDITOR
+        // Writes go through Undo.RecordObject so that editing them marks the scene
+        // holding the graph as dirty. A graph node is an unowned ScriptableObject
+        // serialised inline into the scene, so EditorUtility.SetDirty has no effect on
+        // it and a plain field write is discarded when the scene is reloaded. See the
+        // longer note in UnityEventConditionNode.OnBodyGUI.
         public override void OnBodyGUI()
         {
-            StartTime = (StartTime)EditorGUILayout.EnumPopup("Start Time", StartTime);
-            Duration = EditorGUILayout.FloatField("Duration", Duration);
-            TimeUnit = (TimeUnit)EditorGUILayout.EnumPopup("Time Unit", TimeUnit);
+            EditorGUI.BeginChangeCheck();
+            StartTime startTime = (StartTime)EditorGUILayout.EnumPopup("Start Time", StartTime);
+            float duration = EditorGUILayout.FloatField("Duration", Duration);
+            TimeUnit timeUnit = (TimeUnit)EditorGUILayout.EnumPopup("Time Unit", TimeUnit);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(this, "Changed time condition");
+                StartTime = startTime;
+                Duration = duration;
+                TimeUnit = timeUnit;
+            }
         }
         #endif
     }

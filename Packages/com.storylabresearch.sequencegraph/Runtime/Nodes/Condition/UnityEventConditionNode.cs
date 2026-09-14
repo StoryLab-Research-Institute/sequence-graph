@@ -153,18 +153,50 @@ namespace StoryLabResearch.SequenceGraph
             _eventFieldName = _eventNameStrings[_eventIndex];
         }
 
+        // Every field written here must be wrapped in Undo.RecordObject, and the write
+        // must happen after the record. A graph node is an unowned ScriptableObject
+        // serialised inline into the scene file: it is neither a persistent asset nor a
+        // scene object, so EditorUtility.SetDirty does nothing for it and a plain field
+        // write never marks the owning scene dirty. Unity then never offers to save the
+        // scene and the edit is silently discarded on the next reload - which is exactly
+        // how _behaviour used to unassign itself. Registering an undo is the only thing
+        // that dirties the scene holding the graph.
+        //
+        // Note that when this node is the internal condition of a WaitForConditionNode,
+        // "this" is that internal node, which is likewise unowned and likewise dirties
+        // the scene when recorded.
         public override void OnBodyGUI()
         {
-            _startTime = (EventStartTime)EditorGUILayout.EnumPopup("Start Time", _startTime);
+            EditorGUI.BeginChangeCheck();
+            EventStartTime startTime = (EventStartTime)EditorGUILayout.EnumPopup("Start Time", _startTime);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(this, "Changed event start time");
+                _startTime = startTime;
+            }
 
-            Behaviour lastBehaviour = _behaviour;
+            EditorGUI.BeginChangeCheck();
 #pragma warning disable CS0618 // Type or member is obsolete
-            _behaviour = (Behaviour)EditorGUILayout.ObjectField("Behaviour", _behaviour, typeof(Behaviour));
+            Behaviour behaviour = (Behaviour)EditorGUILayout.ObjectField("Behaviour", _behaviour, typeof(Behaviour));
 #pragma warning restore CS0618 // Type or member is obsolete
-            if (_behaviour != lastBehaviour) UpdateEvents(true);
+            if (EditorGUI.EndChangeCheck() && behaviour != _behaviour)
+            {
+                Undo.RecordObject(this, "Changed event behaviour");
+                _behaviour = behaviour;
+                // UpdateEvents rewrites _eventNameStrings, _eventIndex and
+                // _eventFieldName; it runs inside the recorded block so those are
+                // covered by the same undo entry.
+                UpdateEvents(true);
+            }
 
-            _eventIndex = EditorGUILayout.Popup("Event", _eventIndex, _eventNameStrings);
-            _eventFieldName = _eventNameStrings[_eventIndex];
+            EditorGUI.BeginChangeCheck();
+            int eventIndex = EditorGUILayout.Popup("Event", _eventIndex, _eventNameStrings);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(this, "Changed event");
+                _eventIndex = eventIndex;
+                _eventFieldName = _eventNameStrings[_eventIndex];
+            }
         }
 #endif
     }

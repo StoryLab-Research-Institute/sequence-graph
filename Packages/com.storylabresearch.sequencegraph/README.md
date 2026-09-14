@@ -87,6 +87,15 @@ to its own manifest. See the repository root `README.md`.
   but Prefab Mode contents live in a preview scene where it reports `false`, so
   `PrefabStageUtility.GetPrefabStage` is also required. Prefab Mode is the case that
   actually loses work, so do not drop it.
+- **A hand-rolled `OnBodyGUI` must write its fields through `Undo.RecordObject`.** Graph
+  nodes are unowned `ScriptableObject`s serialised inline into the scene: they are
+  neither persistent assets nor scene objects, so `EditorUtility.SetDirty` has no effect
+  on them and a plain field write never marks the scene dirty. Unity then never offers
+  to save and the edit is silently discarded on reload. Registering an undo is the only
+  thing that dirties the owning scene. Nodes drawn by xNode's default `NodeEditor.OnBodyGUI`
+  get this for free via `serializedObject.ApplyModifiedProperties()`, which is why
+  `UnityEventNode.OnTriggered` always persisted while `UnityEventConditionNode._behaviour`
+  did not.
 - `WaitForConditionNode._internalConditionNode` is a `ScriptableObject` created with
   `CreateInstance` that is never added to `graph.nodes`. It survives only because scene
   files serialise unowned `ScriptableObject` instances inline. Anything that moves a

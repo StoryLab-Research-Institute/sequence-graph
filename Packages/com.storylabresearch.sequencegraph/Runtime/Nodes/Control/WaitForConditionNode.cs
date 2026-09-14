@@ -47,20 +47,31 @@ namespace StoryLabResearch.SequenceGraph
 
         public void OnBodyGUI()
         {
+            EditorGUI.BeginChangeCheck();
             int index = EditorGUILayout.Popup("Condition", _conditionIndex, _conditionNodeTypeNames);
-            if(_conditionIndex != index)
+            if(EditorGUI.EndChangeCheck() && _conditionIndex != index)
             {
                 UpdateCondition(index);
             }
             if (_internalConditionNode != null)
             {
                 EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+                // The internal node records its own undo entries, which dirty the scene
+                // for it as well - see the note in UnityEventConditionNode.OnBodyGUI.
                 _internalConditionNode.OnBodyGUI();
             }
         }
 
         private void UpdateCondition(int index = 0)
         {
+            // Without this the swap never marks the scene dirty and is lost on reload:
+            // this node is an unowned ScriptableObject serialised inline into the scene,
+            // which EditorUtility.SetDirty does not cover. The DestroyImmediate and
+            // CreateInstance below are not themselves undoable, so stepping back over a
+            // condition swap leaves the node with no condition; EvaluateNode already
+            // warns and blocks in that case, and re-picking the type rebuilds it.
+            Undo.RecordObject(this, "Changed wait condition");
+
             if(_internalConditionNode != null) DestroyImmediate(_internalConditionNode);
 
             index = Mathf.Clamp(index, 0, _conditionNodeTypes.Length - 1);
